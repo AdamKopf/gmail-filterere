@@ -55,6 +55,8 @@ async function processEmails(timestamp, config) {
             host: 'imap.gmail.com',
             port: 993,
             tls: true,
+            authTimeout: 30000,
+            connTimeout: 30000,
             tlsOptions: config.settings.useSelfSignedCerts ? {
                 key: key,
                 cert: cert,
