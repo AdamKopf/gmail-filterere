@@ -1,32 +1,51 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Firebase Cloud Functions for clearmail
+ * Scheduled function to process emails at regular intervals
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
+const { processEmails } = require("./processEmails");
+const { getLastTimestamp } = require("./utilities");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// Define secrets for IMAP and OpenAI credentials
+const imapUser = defineSecret("IMAP_USER");
+const imapPassword = defineSecret("IMAP_PASSWORD");
+const openAIKey = defineSecret("OPENAI_API_KEY");
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+/**
+ * Scheduled Cloud Function to process emails every 10 minutes
+ * Set environment variables (secrets) before deploying:
+ * firebase functions:secrets:set IMAP_USER
+ * firebase functions:secrets:set IMAP_PASSWORD
+ * firebase functions:secrets:set OPENAI_API_KEY
+ */
+exports.processEmailsScheduled = onSchedule({
+  schedule: "every 6 minutes",
+  secrets: [imapUser, imapPassword, openAIKey],
+  timeoutSeconds: 300,
+  memory: "512MiB"
+}, async (event) => {
+  try {
+    logger.info("Starting scheduled email processing");
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    // Set environment variables from secrets
+    process.env.IMAP_USER = imapUser.value();
+    process.env.IMAP_PASSWORD = imapPassword.value();
+    process.env.OPENAI_API_KEY = openAIKey.value();
+
+    // Get the last timestamp from Firestore
+    const timestamp = await getLastTimestamp("lastTimestamp.txt");
+    logger.info(`Processing emails since: ${timestamp}`);
+
+    // Process emails
+    const result = await processEmails(timestamp);
+    logger.info(`Email processing completed: ${JSON.stringify(result)}`);
+
+    return result;
+  } catch (error) {
+    logger.error(`Error processing emails: ${error.message}`);
+    throw error;
+  }
+});

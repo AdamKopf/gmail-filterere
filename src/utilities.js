@@ -6,6 +6,7 @@ const path = require('path');
 const config = require('./config');
 
 let db = null;
+let firebaseInitialized = false;
 
 function getFirestoreDB() {
     if (db) return db;
@@ -15,19 +16,30 @@ function getFirestoreDB() {
         : path.join(__dirname, config.settings.firestoreServiceAccountPath);
 
     if (!fsSync.existsSync(serviceAccountPath)) {
-        throw new Error(`Service account file not found at ${serviceAccountPath}`);
+        const errorMsg = `Service account file not found at ${serviceAccountPath}. Please ensure Firebase credentials are set up. See README.md for setup instructions.`;
+        console.error(`[Firebase] ${errorMsg}`);
+        throw new Error(errorMsg);
     }
 
-    const serviceAccount = require(serviceAccountPath);
+    try {
+        const serviceAccount = require(serviceAccountPath);
 
-    if (admin.apps.length === 0) {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
+        if (admin.apps.length === 0) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+            firebaseInitialized = true;
+            console.log('[Firebase] Admin SDK initialized successfully');
+        }
+
+        db = admin.firestore();
+        console.log('[Firebase] Firestore database connection established');
+        return db;
+    } catch (error) {
+        const errorMsg = `Failed to initialize Firebase Admin SDK: ${error.message}`;
+        console.error(`[Firebase] ${errorMsg}`);
+        throw new Error(errorMsg);
     }
-
-    db = admin.firestore();
-    return db;
 }
 
 async function executeOpenAIWithRetry(params, retries = 3, backoff = 2500, rateLimitRetry = 10, timeoutOverride = 27500) {
@@ -100,21 +112,33 @@ async function getLastTimestamp(timestampFilePath) {
             const doc = await docRef.get();
 
             if (doc.exists && doc.data()[config.settings.firestoreField]) {
+                console.log('[Firebase] Retrieved last timestamp from Firestore');
                 return doc.data()[config.settings.firestoreField];
             } else {
+                console.log('[Firebase] No timestamp found in Firestore, using current time');
                 return new Date().toISOString();
             }
         } catch (error) {
-            console.error('Error reading timestamp from Firestore:', error);
-            return new Date().toISOString();
+            console.error('[Firebase] Error reading timestamp from Firestore, falling back to local file:', error.message);
+            // Fallback to local file if Firestore fails
+            try {
+                const lastTimestamp = await fs.readFile(timestampFilePath, 'utf8');
+                console.log('[Fallback] Retrieved last timestamp from local file');
+                return lastTimestamp;
+            } catch (fileError) {
+                console.log('[Fallback] No local timestamp file found, using current time');
+                return new Date().toISOString();
+            }
         }
     }
 
     try {
         const lastTimestamp = await fs.readFile(timestampFilePath, 'utf8');
+        console.log('[Local Storage] Retrieved last timestamp from local file');
         return lastTimestamp;
     } catch (error) {
         // If the file doesn't exist, use the current date-time
+        console.log('[Local Storage] No timestamp file found, using current time');
         return new Date().toISOString();
     }
 }
@@ -127,13 +151,26 @@ async function saveLastTimestamp(timestamp, timestampFilePath) {
             await docRef.set({
                 [config.settings.firestoreField]: timestamp
             }, { merge: true });
+            console.log('[Firebase] Saved last timestamp to Firestore');
         } catch (error) {
-            console.error('Error saving timestamp to Firestore:', error);
+            console.error('[Firebase] Error saving timestamp to Firestore, falling back to local file:', error.message);
+            // Fallback to local file if Firestore fails
+            try {
+                await fs.writeFile(timestampFilePath, timestamp, 'utf8');
+                console.log('[Fallback] Saved last timestamp to local file');
+            } catch (fileError) {
+                console.error('[Fallback] Failed to save timestamp to local file:', fileError.message);
+            }
         }
         return;
     }
 
-    await fs.writeFile(timestampFilePath, timestamp, 'utf8');
+    try {
+        await fs.writeFile(timestampFilePath, timestamp, 'utf8');
+        console.log('[Local Storage] Saved last timestamp to local file');
+    } catch (error) {
+        console.error('[Local Storage] Failed to save timestamp to local file:', error.message);
+    }
 }
 
 

@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// Storage rules for clearmail
+// Currently disabled - enable if needed for file uploads
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Deny all access by default
+    // To enable storage, add specific rules here
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

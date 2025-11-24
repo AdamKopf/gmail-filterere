@@ -1,0 +1,16 @@
+rules_version='2'
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Settings collection - only allow server-side (admin SDK) access
+    // Client apps should not access this directly
+    match /settings/{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Default deny for all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

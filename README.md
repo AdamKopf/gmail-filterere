@@ -107,7 +107,47 @@ To securely access your Gmail account using IMAP in applications like clearmail,
     - A 16-character code will be displayed on your screen. This is your app password, and you'll use it instead of your regular password for setting up IMAP access in clearmail.
     - Follow any on-screen instructions to enter the app password into clearmail's configuration. Typically, you'll replace your regular password with this app password in the `.env` file where IMAP credentials are specified.
 
-### Step 2: Configure the YAML File
+### Step 2: Setup Firebase (Optional)
+
+Firebase integration is **optional** and is used only for storing email processing timestamps in Firestore instead of a local file. If you don't want to use Firebase, you can skip this step and use the default local file storage.
+
+#### To Enable Firebase Timestamp Storage:
+
+1. **Create a Firebase Project** (if you don't have one):
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Click "Create a project"
+   - Follow the setup wizard
+
+2. **Generate Service Account Key**:
+   - In Firebase Console, go to **Project Settings** → **Service Accounts**
+   - Click **"Generate new private key"** at the bottom
+   - A JSON file will download containing your credentials
+
+3. **Add the Service Account Key to clearmail**:
+   - Create a `certs` directory in the clearmail project root if it doesn't exist:
+     ```bash
+     mkdir -p certs
+     ```
+   - Copy the downloaded JSON file to `certs/serviceAccountKey.json`
+   - **IMPORTANT**: Ensure `.gitignore` includes `certs/serviceAccountKey.json` to keep credentials secure
+
+4. **Enable Firestore in Firebase**:
+   - In Firebase Console, go to **Firestore Database**
+   - Click **"Create Database"**
+   - Choose **"Start in production mode"** and select a location (e.g., `eur3`)
+   - Click **"Enable"**
+
+5. **Update config.yml**:
+   - Set `useFirestoreForTimestamp: true` in `config.yml`
+   - Verify that `firestoreServiceAccountPath` points to `certs/serviceAccountKey.json`
+
+#### Security Notes:
+
+- The `certs/serviceAccountKey.json` file contains sensitive credentials. Keep it secure.
+- The updated Firestore security rules restrict access to admin SDK only (server-side).
+- If Firebase credentials are invalid or missing, the app will automatically fall back to local file storage.
+
+### Step 3: Configure the YAML File
 
 Navigate to the `config.yml` file in the clearmail directory. Customize these settings to match your email management preferences.
 
@@ -127,7 +167,7 @@ The `config.yml` file contains several options to customize how clearmail works:
 
 Additional details are included as comments in `config.yml`.
 
-### Step 3: Configure .env File
+### Step 4: Configure .env File
 
 To integrate your environment with clearmail, you'll need to configure the `.env` file by setting up various environment variables that the application requires to run. Copy the `.env.example` to `.env` and fill in the following:
 
@@ -160,7 +200,7 @@ IMAP_HOST=imap.gmail.com
 IMAP_PORT=993
 ```
 
-### Step 4: Run the Process
+### Step 5: Run the Process
 
 Expanding on Step 4 to include instructions on setting up Node.js on your machine and ensuring you navigate to the correct folder to run `clearmail`:
 

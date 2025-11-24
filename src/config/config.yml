@@ -18,13 +18,19 @@ settings:
   timestampFilePath: lastTimestamp.txt
 
   # if true, save the timestamp to Cloud Firestore instead of a local file
-  useFirestoreForTimestamp: true
+  # NOTE: Requires valid Firebase service account credentials at firestoreServiceAccountPath
+  # If set to true but credentials are invalid, will automatically fallback to local file storage
+  useFirestoreForTimestamp: false
   # Path to your Firebase service account JSON file. 
-  # Download this from Firebase Console -> Project Settings -> Service accounts
+  # Download this from Firebase Console -> Project Settings -> Service accounts -> Generate new private key
+  # IMPORTANT: Keep this file secure and add it to .gitignore (it contains sensitive credentials)
+  # This path is relative to the project root, or use an absolute path
   firestoreServiceAccountPath: certs/serviceAccountKey.json
+  # Firestore collection name for storing app settings
   firestoreCollection: settings
+  # Firestore document name for storing app settings
   firestoreDocument: clearmail
-  # Field name in the document to store the timestamp
+  # Field name in the document to store the last processed email timestamp
   firestoreField: lastTimestamp
 
   # sortIntoCategoryFolders can be either true or false
