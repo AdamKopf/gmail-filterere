@@ -6,8 +6,8 @@ require('dotenv').config();
 const app = express();
 const port = config.settings.portNumber;
 
-const { getLastTimestamp, saveLastTimestamp } = require('../shared/utilities');
-const { processEmails } = require('../shared/processEmails');
+const { getLastTimestamp, saveLastTimestamp } = require('../filterere/shared/utilities');
+const { processEmails } = require('../filterere/shared/processEmails');
 
 
 async function main() {

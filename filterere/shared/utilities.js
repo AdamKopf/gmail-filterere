@@ -18,9 +18,9 @@ function getFirestoreDB(config) {
             console.log('[Firebase] Admin SDK initialized successfully');
         }
     } else {
-        const serviceAccountPath = path.isAbsolute(config.settings.firestoreServiceAccountPath)
-            ? config.settings.firestoreServiceAccountPath
-            : path.join(__dirname, '..', config.settings.firestoreServiceAccountPath);
+        const serviceAccountPath = path.isAbsolute(config.settings.firestoreServiceAccountPath) ?
+            config.settings.firestoreServiceAccountPath :
+            path.join(__dirname, '..', config.settings.firestoreServiceAccountPath);
 
         if (!fsSync.existsSync(serviceAccountPath)) {
             const errorMsg = `Service account file not found at ${serviceAccountPath}. Please ensure Firebase credentials are set up. See README.md for setup instructions.`;

@@ -6,8 +6,8 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
-const { processEmails } = require("../shared/processEmails");
-const { getLastTimestamp } = require("../shared/utilities");
+const { processEmails } = require("./shared/processEmails");
+const { getLastTimestamp } = require("./shared/utilities");
 const config = require("./config");
 
 // Define secrets for IMAP and OpenAI credentials
@@ -41,7 +41,7 @@ exports.processEmailsScheduled = onSchedule({
     logger.info(`Processing emails since: ${timestamp}`);
 
     // Process emails
-    const result = await processEmails(timestamp);
+    const result = await processEmails(timestamp, config);
     logger.info(`Email processing completed: ${JSON.stringify(result)}`);
 
     return result;
