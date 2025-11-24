@@ -159,15 +159,18 @@ function fixJSON(input) {
 }
 
 async function getLastTimestamp(timestampFilePath, config) {
+    console.log(`[Timestamp] Attempting to get last timestamp. useFirestore: ${config.settings.useFirestoreForTimestamp}`);
     if (config.settings.useFirestoreForTimestamp) {
         try {
             const db = getFirestoreDB(config);
             const docRef = db.collection(config.settings.firestoreCollection).doc(config.settings.firestoreDocument);
+            console.log(`[Firebase] Fetching from collection: ${config.settings.firestoreCollection}, doc: ${config.settings.firestoreDocument}, field: ${config.settings.firestoreField}`);
             const doc = await docRef.get();
 
             if (doc.exists && doc.data()[config.settings.firestoreField]) {
-                console.log('[Firebase] Retrieved last timestamp from Firestore');
-                return doc.data()[config.settings.firestoreField];
+                const timestamp = doc.data()[config.settings.firestoreField];
+                console.log(`[Firebase] Retrieved last timestamp from Firestore: ${timestamp}`);
+                return timestamp;
             } else {
                 console.log('[Firebase] No timestamp found in Firestore, using current time');
                 return new Date().toISOString();
@@ -177,7 +180,7 @@ async function getLastTimestamp(timestampFilePath, config) {
             // Fallback to local file if Firestore fails
             try {
                 const lastTimestamp = await fs.readFile(timestampFilePath, 'utf8');
-                console.log('[Fallback] Retrieved last timestamp from local file');
+                console.log(`[Fallback] Retrieved last timestamp from local file: ${lastTimestamp}`);
                 return lastTimestamp;
             } catch (fileError) {
                 console.log('[Fallback] No local timestamp file found, using current time');
@@ -188,7 +191,7 @@ async function getLastTimestamp(timestampFilePath, config) {
 
     try {
         const lastTimestamp = await fs.readFile(timestampFilePath, 'utf8');
-        console.log('[Local Storage] Retrieved last timestamp from local file');
+        console.log(`[Local Storage] Retrieved last timestamp from local file: ${lastTimestamp}`);
         return lastTimestamp;
     } catch (error) {
         // If the file doesn't exist, use the current date-time
@@ -198,20 +201,22 @@ async function getLastTimestamp(timestampFilePath, config) {
 }
 
 async function saveLastTimestamp(timestamp, timestampFilePath, config) {
+    console.log(`[Timestamp] Attempting to save timestamp: ${timestamp}. useFirestore: ${config.settings.useFirestoreForTimestamp}`);
     if (config.settings.useFirestoreForTimestamp) {
         try {
             const db = getFirestoreDB(config);
             const docRef = db.collection(config.settings.firestoreCollection).doc(config.settings.firestoreDocument);
+            console.log(`[Firebase] Saving to collection: ${config.settings.firestoreCollection}, doc: ${config.settings.firestoreDocument}, field: ${config.settings.firestoreField}`);
             await docRef.set({
                 [config.settings.firestoreField]: timestamp
             }, { merge: true });
-            console.log('[Firebase] Saved last timestamp to Firestore');
+            console.log(`[Firebase] Successfully saved last timestamp to Firestore: ${timestamp}`);
         } catch (error) {
             console.error('[Firebase] Error saving timestamp to Firestore, falling back to local file:', error.message);
             // Fallback to local file if Firestore fails
             try {
                 await fs.writeFile(timestampFilePath, timestamp, 'utf8');
-                console.log('[Fallback] Saved last timestamp to local file');
+                console.log(`[Fallback] Saved last timestamp to local file: ${timestamp}`);
             } catch (fileError) {
                 console.error('[Fallback] Failed to save timestamp to local file:', fileError.message);
             }
@@ -221,7 +226,7 @@ async function saveLastTimestamp(timestamp, timestampFilePath, config) {
 
     try {
         await fs.writeFile(timestampFilePath, timestamp, 'utf8');
-        console.log('[Local Storage] Saved last timestamp to local file');
+        console.log(`[Local Storage] Saved last timestamp to local file: ${timestamp}`);
     } catch (error) {
         console.error('[Local Storage] Failed to save timestamp to local file:', error.message);
     }

@@ -171,7 +171,9 @@ async function processEmails(timestamp, config) {
                         });
                     } else {
                         console.log('No new messages to fetch.');
+                        saveLastTimestamp(new Date().toISOString(), config.settings.timestampFilePath, config);
                         imap.end();
+                        resolve({statusCode: 200, message: 'Email processing completed.'});
                     }
                 });
             });
