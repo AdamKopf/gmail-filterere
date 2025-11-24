@@ -4,6 +4,10 @@ const fsSync = require('fs');
 const admin = require('firebase-admin');
 const path = require('path');
 
+let remoteConfigCache = null;
+let remoteConfigCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 let db = null;
 let firebaseInitialized = false;
 
@@ -48,6 +52,40 @@ function getFirestoreDB(config) {
     db = admin.firestore();
     console.log('[Firebase] Firestore database connection established');
     return db;
+}
+
+async function getRunInterval(config) {
+    try {
+        // Check cache first
+        const now = Date.now();
+        if (remoteConfigCache && (now - remoteConfigCacheTime) < CACHE_DURATION) {
+            const runInterval = remoteConfigCache.parameters?.runInterval?.defaultValue?.value;
+            if (runInterval && !isNaN(parseInt(runInterval))) {
+                console.log(`[Remote Config] Using cached runInterval: ${runInterval} seconds`);
+                return parseInt(runInterval);
+            }
+        }
+
+        // Fetch from Remote Config
+        const remoteConfig = admin.remoteConfig();
+        const template = await remoteConfig.getTemplate();
+
+        remoteConfigCache = template;
+        remoteConfigCacheTime = now;
+
+        const runInterval = template.parameters?.runInterval?.defaultValue?.value;
+        if (runInterval && !isNaN(parseInt(runInterval))) {
+            console.log(`[Remote Config] Retrieved runInterval: ${runInterval} seconds`);
+            return parseInt(runInterval);
+        } else {
+            console.log(`[Remote Config] runInterval not found or invalid, using config default: ${config.settings.refreshInterval} seconds`);
+            return config.settings.refreshInterval;
+        }
+    } catch (error) {
+        console.error('[Remote Config] Error fetching runInterval:', error.message);
+        console.log(`[Remote Config] Falling back to config default: ${config.settings.refreshInterval} seconds`);
+        return config.settings.refreshInterval;
+    }
 }
 
 async function executeOpenAIWithRetry(params, retries = 3, backoff = 2500, rateLimitRetry = 10, timeoutOverride = 27500) {
@@ -187,5 +225,6 @@ module.exports = {
     fixJSON,
     getLastTimestamp,
     saveLastTimestamp,
-    getFirestoreDB
+    getFirestoreDB,
+    getRunInterval
 };

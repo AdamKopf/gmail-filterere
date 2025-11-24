@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 const port = config.settings.portNumber;
 
-const { getLastTimestamp, saveLastTimestamp } = require('../filterere/shared/utilities');
+const { getLastTimestamp, saveLastTimestamp, getRunInterval } = require('../filterere/shared/utilities');
 const { processEmails } = require('../filterere/shared/processEmails');
 
 
@@ -39,7 +39,8 @@ async function main() {
         }
     } else {
         // Script mode
-        const refreshIntervalMilliseconds = config.settings.refreshInterval * 1000; // Convert seconds to milliseconds
+        const runIntervalSeconds = await getRunInterval(config);
+        const refreshIntervalMilliseconds = runIntervalSeconds * 1000; // Convert seconds to milliseconds
 
         const runProcessEmailsPeriodically = async () => {
              try {

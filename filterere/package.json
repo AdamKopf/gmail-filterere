@@ -21,7 +21,8 @@
     "imap": "^0.8.19",
     "js-yaml": "^4.1.0",
     "mailparser": "^3.6.7",
-    "openai": "^4.27.0"
+    "openai": "^4.27.0",
+    "pem": "^1.14.8"
   },
   "devDependencies": {
     "eslint": "^8.15.0",
