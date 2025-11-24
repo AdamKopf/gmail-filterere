@@ -1,30 +1,32 @@
-# clearmail README
+# filterere
+
+This is a fork of [clearmail](https://github.com/andywalters47/clearmail), an open-source project that leverages AI to filter emails according to a set of simple rules you can write in english.
 
 ## Introduction
 
-**clearmail** is an open-source project that leverages AI to filter emails according to a set of simple rules you can write in english. The tool stars important emails and rejects or categorizes non-important emails according to preferences you can easily specify.
+**filterere** is an intelligent email filtering system that uses AI to automatically star important emails and move non-important emails to specified folders or labels according to rules you define in plain English. The tool respects your privacy—it never deletes emails, only organizes them with labels and moves.
 
-For maximum peace of mind, clearmail does not delete any emails. Instead, it only adds or removes labels from them, allowing you to review the AI's work. This project began as a weekend project and is still very much a work in progress!
+This project began as a fork of clearmail and adds additional features and improvements for deployment as Google Cloud Functions and other enhanced capabilities.
 
 ## How it works
 
 ### 1. At a Given Interval...
 
-Clearmail operates on a configurable interval, determined by the `refreshInterval` setting in the `config.yml` file. This interval sets how often clearmail checks for new emails. When running in script mode, the process wakes up at this interval, checks for new emails since the last processed timestamp, and then goes back to sleep until the next interval.
+Filterere operates on a configurable interval, determined by the `refreshInterval` setting in the `config.yml` file. This interval sets how often filterere checks for new emails. When running in script mode, the process runs continuously and checks for new emails at the specified interval (e.g., every 120 seconds by default).
 
-### 2. Connecting to the Gmail via IMAP
+### 2. Connecting to Gmail via IMAP
 
-Clearmail uses the IMAP protocol to connect to your Gmail account. It securely authenticates using the credentials provided in the `.env` file and establishes a connection to the server.
+Filterere uses the IMAP protocol to connect to your Gmail account. It securely authenticates using the credentials provided in the `.env` file and establishes a connection to the server.
 
 ### 3. Searching for New Emails
 
-Once connected, clearmail searches the inbox for any unread emails that have arrived since the last processed timestamp that are not STARRED.
+Once connected, filterere searches the inbox for any unread emails that have arrived since the last processed timestamp that are not STARRED.
 
 ### 4. Processing Each Email
 
-For each new email identified, clearmail performs the following steps:
+For each new email identified, filterere performs the following steps:
 
-- **Analyzing the Email:** The email's sender, subject, and body is analyzed using either the local LLM or OpenAI to determine if the email should be kept/starred or rejected/sorted according to predefined rules you specify in plain english in the `config.yml` file.
+- **Analyzing the Email:** The email's sender, subject, and body is analyzed using either the local LLM or OpenAI to determine if the email should be kept/starred or rejected/sorted according to predefined rules you specify in plain English in the `config.yml` file.
 
 #### Sample Rules for Keeping Emails
 
@@ -46,9 +48,9 @@ rules:
     * Email looks like a promotion
 ```
 
-- **Categorizing or Moving the Email:** If the email is worth reading according to your rules, it is left in the inbox and starred.  If it's not, its either:
+- **Categorizing or Moving the Email:** If the email is worth reading according to your rules, it is left in the inbox and starred. If it's not, it's either:
     - Moved to the rejection folder (as named in `rejectedFolderName`), if the email is considered not important.
-    - Moved to a specific label like `Social`, if `sortIntoCategoryFolders` is enabled and the email matches one of the specified categories.  You can specify any categories you want!  For example:
+    - Moved to a specific label like `Social`, if `sortIntoCategoryFolders` is enabled and the email matches one of the specified categories. You can specify any categories you want! For example:
 
         ```yaml
         categoryFolderNames:
@@ -61,11 +63,11 @@ rules:
 
 ### 5. Wrap Up
 
-If any errors occur during the process, such as connection issues or errors in email analysis, clearmail logs these errors for debugging purposes.
+If any errors occur during the process, such as connection issues or errors in email analysis, filterere logs these errors for debugging purposes.
 
 ## Requirements
 
-To use clearmail you will need:
+To use filterere you will need:
 
 - A Gmail account
 - Node.js installed on your system
@@ -74,11 +76,11 @@ Note: this has only been tested for Mac.
 
 ## Setup Instructions
 
-Follow these steps to get clearmail up and running on your system:
+Follow these steps to get filterere up and running on your system:
 
 ### Step 1: Gmail IMAP Access with App Password
 
-To securely access your Gmail account using IMAP in applications like clearmail, especially when you have 2-Step Verification enabled, you'll need to create and use an app password. An app password is a 16-character code that allows less secure apps to access your Google Account. Here's a detailed guide on how to create and use app passwords for Gmail IMAP access:
+To securely access your Gmail account using IMAP in applications like filterere, especially when you have 2-Step Verification enabled, you'll need to create and use an app password. An app password is a 16-character code that allows less secure apps to access your Google Account. Here's a detailed guide on how to create and use app passwords for Gmail IMAP access:
 
 #### Prerequisites
 - **2-Step Verification:** To create an app password, your Google Account must have 2-Step Verification enabled. This adds an additional layer of security to your account by requiring a second verification step during sign-in.
@@ -104,8 +106,8 @@ To securely access your Gmail account using IMAP in applications like clearmail,
     - Click on "Generate" to create your new app password.
 
 6. **Copy and Use the App Password:**
-    - A 16-character code will be displayed on your screen. This is your app password, and you'll use it instead of your regular password for setting up IMAP access in clearmail.
-    - Follow any on-screen instructions to enter the app password into clearmail's configuration. Typically, you'll replace your regular password with this app password in the `.env` file where IMAP credentials are specified.
+    - A 16-character code will be displayed on your screen. This is your app password, and you'll use it instead of your regular password for setting up IMAP access in filterere.
+    - Follow any on-screen instructions to enter the app password into filterere's configuration. Typically, you'll replace your regular password with this app password in the `.env` file where IMAP credentials are specified.
 
 ### Step 2: Setup Firebase (Optional)
 
@@ -123,8 +125,8 @@ Firebase integration is **optional** and is used only for storing email processi
    - Click **"Generate new private key"** at the bottom
    - A JSON file will download containing your credentials
 
-3. **Add the Service Account Key to clearmail**:
-   - Create a `certs` directory in the clearmail project root if it doesn't exist:
+3. **Add the Service Account Key to filterere**:
+   - Create a `certs` directory in the filterere project root if it doesn't exist:
      ```bash
      mkdir -p certs
      ```
@@ -149,11 +151,11 @@ Firebase integration is **optional** and is used only for storing email processi
 
 ### Step 3: Configure the YAML File
 
-Navigate to the `config.yml` file in the clearmail directory. Customize these settings to match your email management preferences.
+Navigate to the `config.yml` file in the filterere directory. Customize these settings to match your email management preferences.
 
 #### YAML File Options
 
-The `config.yml` file contains several options to customize how clearmail works:
+The `config.yml` file contains several options to customize how filterere works:
 
 - `useLocalLLM`: Determines whether to use a local language model or OpenAI for email analysis.
 - `maxEmailChars`: The maximum number of characters from an email body to feed to the AI for analysis.
@@ -169,12 +171,12 @@ Additional details are included as comments in `config.yml`.
 
 ### Step 4: Configure .env File
 
-To integrate your environment with clearmail, you'll need to configure the `.env` file by setting up various environment variables that the application requires to run. Copy the `.env.example` to `.env` and fill in the following:
+To integrate your environment with filterere, you'll need to configure the `.env` file by setting up various environment variables that the application requires to run. Copy the `.env.example` to `.env` and fill in the following:
 
 #### .env File Configuration
 
 1. **OPENAI_API_KEY**:
-    - **Description**: Optional.  If you choose to not use a local LLM, fill in your OpenAI API key here.
+    - **Description**: Optional. If you choose to not use a local LLM, fill in your OpenAI API key here.
 
 2. **IMAP_USER**:
     - **Description**: Your email address that you will use to access your Gmail account via IMAP.
@@ -200,13 +202,11 @@ IMAP_HOST=imap.gmail.com
 IMAP_PORT=993
 ```
 
-### Step 5: Run the Process
-
-Expanding on Step 4 to include instructions on setting up Node.js on your machine and ensuring you navigate to the correct folder to run `clearmail`:
+### Step 5: Install Dependencies and Run filterere
 
 #### Installing Node.js
 
-Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine, and it's required to run `clearmail`. Here's how to install it:
+Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine, and it's required to run `filterere`. Here's how to install it:
 
 1. **Download Node.js**: Visit the [official Node.js website](https://nodejs.org/) to download the installer for your operating system. It is recommended to download the LTS (Long Term Support) version for better stability.
 
@@ -223,41 +223,52 @@ Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine, and it's
 
    If the installation was successful, you should see the version numbers for both Node.js and npm.
 
-#### Navigating to the clearmail Directory
+#### Navigating to the filterere Directory
 
-Before running the `clearmail` process, make sure you are in the directory where `clearmail` is located:
+Before running `filterere`, make sure you are in the project root directory:
 
 1. **Open a Terminal or Command Prompt**: Use a terminal on Linux or macOS, or Command Prompt/Powershell on Windows.
 
-2. **Navigate to the clearmail Directory**: Use the `cd` (change directory) command to navigate to the folder where you have `clearmail` installed. For example, if you have `clearmail` in a folder named "clearmail" on your desktop, the command might look like this:
+2. **Navigate to the Project Root**: Use the `cd` (change directory) command to navigate to the folder where you have the project installed. For example:
 
    - On Windows:
        ```bash
-       cd Desktop\clearmail
+       cd Desktop\clearmail-main
        ```
    - On Linux or macOS:
        ```bash
-       cd ~/Desktop/clearmail
+       cd ~/Desktop/clearmail-main
        ```
 
-#### Running clearmail
+#### Installing Project Dependencies
 
-Once Node.js is installed and you are in the correct directory, you can start `clearmail` by running the following command in your terminal or command prompt:
+Once you are in the project root directory, install the required npm dependencies:
 
 ```bash
-node server.js
+npm install
 ```
 
-This will initialize clearmail and begin sorting your emails according to the defined rules.  It will continue to run at the defined interval and output data about its activities to the shell.
+#### Running filterere
 
-#### Stopping clearmail
+After dependencies are installed, start `filterere` by running:
 
-To stop the clearmail process type `<ctrl> + c` on Mac.
+```bash
+npm start
+```
 
+The behavior depends on your configuration:
+
+- **Script Mode** (default, `runAsServerOrScript: script`): The process runs continuously, checking for new emails at the interval specified by `refreshInterval` in `config.yml`. It will output activity information to the terminal.
+
+- **Server Mode** (`runAsServerOrScript: server`): An Express server starts and listens on the port specified by `portNumber` (default: 3003). Trigger email processing via HTTP GET request to `http://localhost:3003/process-emails`.
+
+#### Stopping filterere
+
+To stop the filterere process, press `Ctrl + C` on your keyboard.
 
 ## Large Language Model (LLM) Choice: Local or OpenAI
 
-Clearmail supports integration with any running local LLM and is configured out of the box to support default LM Studio settings. The advantage of Local LLMs is privacy and zero inference costs, but the tradeoff is likely performance.  For that reason, clearmail also supports using any OpenAI chat completion model.
+Filterere supports integration with any running local LLM and is configured out of the box to support default LM Studio settings. The advantage of Local LLMs is privacy and zero inference costs, but the tradeoff is likely performance. For that reason, filterere also supports using any OpenAI chat completion model.
 
 ### Local Option: Setting Up LM Studio
 
@@ -265,15 +276,15 @@ Clearmail supports integration with any running local LLM and is configured out 
 
 1. **Download and Install LM Studio:** Visit [https://lmstudio.ai/](https://lmstudio.ai/) and download the latest version of LM Studio for your operating system. Follow the installation instructions provided on the website.
 
-2. **Start an Inference Server:** Once LM Studio is installed, launch the application and start an inference server. This server will handle requests from clearmail to process emails.
+2. **Start an Inference Server:** Once LM Studio is installed, launch the application and start an inference server. This server will handle requests from filterere to process emails.
 
 3. **Download a Language Model:** Any model can work, but we recommend searching for `TheBloke/Mistral-7B-Instruct-v0.2-code-ft-GGUF` within LM Studio's model marketplace and download any of the models listed there. These models are specifically tailored for instruction-following tasks and code generation, making them well-suited for analyzing and categorizing emails.
 
-4. **Specify the Connection String:** After setting up the inference server, note the connection string provided by LM Studio. If you modify it, update clearmail's `config.yml` under the `localLLM.postURL` field to ensure clearmail can communicate with the local LLM server.  If you don't modify it, clearmail will work out of the box with LMStudio's loaded model.
+4. **Specify the Connection String:** After setting up the inference server, note the connection string provided by LM Studio. If you modify it, update filterere's `config.yml` under the `localLLM.postURL` field to ensure filterere can communicate with the local LLM server. If you don't modify it, filterere will work out of the box with LMStudio's loaded model.
 
-### Configuration in clearmail
+### Configuration in filterere
 
-Once your LM Studio server is running and the model is downloaded, configure clearmail to use the local LLM by editing the `config.yml` file:
+Once your LM Studio server is running and the model is downloaded, configure filterere to use the local LLM by editing the `config.yml` file:
 
 ```yaml
 settings:
@@ -287,7 +298,7 @@ Make sure the `useLocalLLM` setting is set to `true` and the `postURL` points to
 
 ### Using OpenAI
 
-While using local LLMs can offer many advantages, it's important to note that performance and reliability may vary compared to using OpenAI's APIs. We have included some `fixJSON` work in the clearmail codebase to address potential inconsistencies with model outputs, but local models can still be somewhat unreliable. If you encounter issues, consider using OpenAI but keep in mind you are sending your emails to their AI and you need to be comfortable with that level of not-privacy.
+While using local LLMs can offer many advantages, it's important to note that performance and reliability may vary compared to using OpenAI's APIs. We have included some `fixJSON` work in the filterere codebase to address potential inconsistencies with model outputs, but local models can still be somewhat unreliable. If you encounter issues, consider using OpenAI but keep in mind you are sending your emails to their AI and you need to be comfortable with that level of not-privacy.
 
 For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, which offers a good balance between speed, accuracy, and cost. The `gpt-3.5-turbo` model also provides reasonably good performance but may not match the latest advancements found in newer models.
 
@@ -297,14 +308,14 @@ For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, wh
     - Visit the OpenAI platform at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys). If you already have an account, log in using your credentials. If you don't, you'll need to sign up and create an account.
 
 2. **Create a New Secret Key**:
-    - Once logged in, you'll be directed to the API keys section of your OpenAI account. Look for the "Create new secret key" button and click on it. This action will generate a new API key for you to use with applications like clearmail.
+    - Once logged in, you'll be directed to the API keys section of your OpenAI account. Look for the "Create new secret key" button and click on it. This action will generate a new API key for you to use with applications like filterere.
 
 3. **Copy Your Key**:
-    - After creating your new secret key, a window will pop up showing your newly generated API key. Use the "Copy" button to copy your key to your clipboard. Make sure to save it in a secure place, as you will need to enter this key into your clearmail configuration.
+    - After creating your new secret key, a window will pop up showing your newly generated API key. Use the "Copy" button to copy your key to your clipboard. Make sure to save it in a secure place, as you will need to enter this key into your filterere configuration.
 
-#### Integrating the API Key into clearmail
+#### Integrating the API Key into filterere
 
-1. **Open Your .env File**: Navigate to the root directory of your clearmail project and open the `.env` file in a text editor. If you haven't created this file yet, you can copy and rename the `.env.example` file to `.env`.
+1. **Open Your .env File**: Navigate to the root directory of your filterere project and open the `.env` file in a text editor. If you haven't created this file yet, you can copy and rename the `.env.example` file to `.env`.
 
 2. **Enter Your OpenAI API Key**: Locate the line starting with `OPENAI_API_KEY=` and paste your copied API key right after the equals sign (`=`) without any spaces. It should look something like this:
 
@@ -314,11 +325,11 @@ For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, wh
 
    Replace `your_copied_api_key_here` with the API key you copied from the OpenAI platform.
 
-3. **Save Changes**: After entering your API key, save the `.env` file. This update will allow clearmail to use your OpenAI API key to access the AI services required for email analysis.
+3. **Save Changes**: After entering your API key, save the `.env` file. This update will allow filterere to use your OpenAI API key to access the AI services required for email analysis.
 
-## Using PM2 to Manage the clearmail Process
+## Using PM2 to Manage the filterere Process
 
-[PM2](https://pm2.keymetrics.io/) is a process manager for Node.js applications that can help manage and keep your clearmail process running in the background. To use PM2 with clearmail:
+[PM2](https://pm2.keymetrics.io/) is a process manager for Node.js applications that can help manage and keep your filterere process running in the background. To use PM2 with filterere:
 
 1. Install PM2 globally using npm:
 
@@ -326,22 +337,28 @@ For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, wh
     npm install pm2 -g
     ```
 
-2. Start clearmail with PM2:
+2. Start filterere with PM2:
 
     ```bash
-    pm2 start server.js --name clearmail
+    pm2 start server.js --name filterere
     ```
 
-3. To ensure clearmail starts on system reboot, use the `pm2 startup` command and follow the instructions provided.
+3. To ensure filterere starts on system reboot, use the `pm2 startup` command and follow the instructions provided.
 
-4. To stop clearmail, use:
+4. To stop filterere, use:
 
     ```bash
-    pm2 stop clearmail
+    pm2 stop filterere
     ```
 
-## Contact
+## Contributing
 
-For questions, suggestions, or contributions, please get in touch with the project owner, [Andy Walters](mailto:andywalters@gmail.com). Your feedback is much appreciated!
+This is a fork of clearmail with enhancements. Contributions are welcome. Please feel free to submit issues and pull requests.
 
-Project sponsored by [Emerge Haus](https://emerge.haus), a custom Generative AI consultancy & dev shop.
+## License
+
+Please refer to the original clearmail project for licensing information.
+
+## Acknowledgments
+
+This project is a fork of [clearmail](https://github.com/andywalters47/clearmail) by Andy Walters.

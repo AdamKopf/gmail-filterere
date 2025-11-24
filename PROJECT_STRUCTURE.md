@@ -16,7 +16,7 @@ clearmail-main/
 ├── functions/               # Google Cloud Functions (TypeScript)
 │   └── src/
 │       ├── index.ts         # Primary Cloud Function exports
-│       └── genkit-sample.ts # AI Framework integration example
+
 │
 ├── filterere/               # Alternative Cloud Functions deployment
 │   ├── index.js            # Secondary Cloud Function

@@ -48,7 +48,7 @@ async function analyzeEmail(emailSubject, emailSender, emailBody, emailDate) {
                 // response_format: {"type": "json_object"},
                 messages: [{
                     'role': 'system',
-                    'content': `We are an AI built to test whether an email meets criteria for user ${config.settings.myName}.`,
+                    'content': `We are an AI built to test whether an email meets criteria.`,
                 }, {
                     'role': 'user',
                     'content': emailPrompt
@@ -62,7 +62,7 @@ async function analyzeEmail(emailSubject, emailSender, emailBody, emailDate) {
                 "messages": [
                     {
                         "role": "system",
-                        "content": `We are an AI built to test whether an email meets criteria for user ${config.settings.myName}.`
+                        "content": `We are an AI built to test whether an email meets criteria.`
                     },
                     {
                         "role": "user",

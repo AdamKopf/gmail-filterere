@@ -1,7 +1,4 @@
 settings:
-  myName: Andy Walters
-  myEmail: andywalters@gmail.com
-
   # if set to false, OpenAI is used
   useLocalLLM: false
 
