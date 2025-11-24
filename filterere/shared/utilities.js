@@ -26,26 +26,34 @@ function getFirestoreDB(config) {
             config.settings.firestoreServiceAccountPath :
             path.join(__dirname, '..', config.settings.firestoreServiceAccountPath);
 
-        if (!fsSync.existsSync(serviceAccountPath)) {
-            const errorMsg = `Service account file not found at ${serviceAccountPath}. Please ensure Firebase credentials are set up. See README.md for setup instructions.`;
-            console.error(`[Firebase] ${errorMsg}`);
-            throw new Error(errorMsg);
+        // Try to use specific service account file if it exists
+        if (fsSync.existsSync(serviceAccountPath)) {
+            try {
+                const serviceAccount = require(serviceAccountPath);
+
+                if (admin.apps.length === 0) {
+                    admin.initializeApp({
+                        credential: admin.credential.cert(serviceAccount)
+                    });
+                    firebaseInitialized = true;
+                    console.log('[Firebase] Admin SDK initialized successfully using service account file');
+                }
+            } catch (error) {
+                console.warn(`[Firebase] Failed to initialize with service account file: ${error.message}. Falling back to default credentials...`);
+            }
         }
 
-        try {
-            const serviceAccount = require(serviceAccountPath);
-
-            if (admin.apps.length === 0) {
-                admin.initializeApp({
-                    credential: admin.credential.cert(serviceAccount)
-                });
+        // If not initialized yet (no file or file failed), try Application Default Credentials
+        if (!firebaseInitialized && admin.apps.length === 0) {
+            try {
+                admin.initializeApp();
                 firebaseInitialized = true;
-                console.log('[Firebase] Admin SDK initialized successfully');
+                console.log('[Firebase] Admin SDK initialized successfully using Application Default Credentials');
+            } catch (error) {
+                const errorMsg = `Failed to initialize Firebase Admin SDK. \n1. Checked for service account at: ${serviceAccountPath} (not found or invalid)\n2. Checked for Application Default Credentials (run 'gcloud auth application-default login')\nError: ${error.message}`;
+                console.error(`[Firebase] ${errorMsg}`);
+                throw new Error(errorMsg);
             }
-        } catch (error) {
-            const errorMsg = `Failed to initialize Firebase Admin SDK: ${error.message}`;
-            console.error(`[Firebase] ${errorMsg}`);
-            throw new Error(errorMsg);
         }
     }
 

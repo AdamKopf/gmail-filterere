@@ -112,49 +112,44 @@ To securely access your Gmail account using IMAP in applications like filterere,
     - Follow any on-screen instructions to enter the app password into filterere's configuration. Typically, you'll replace your regular password with this app password in the `.env` file where IMAP credentials are specified.
 
 ### Step 2: Optional - Firebase Cloud Deployment
-
-**Firebase is completely optional.** Filterere works perfectly as a standard Node.js application with local file storage. You only need Firebase if you want to:
-
-- **Deploy to Cloud Functions** - Run email processing as serverless functions on Firebase infrastructure
-- **Use Firestore storage** - Store timestamps and settings in the cloud instead of local files
-
-**Skip this entire step if you just want to run locally** - the app will work with local file storage by default.
-
-#### If You Want Firebase Cloud Deployment:
-
-1. **Create a Firebase Project** (if you don't have one):
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Click "Create a project"
-   - Follow the setup wizard
-
-2. **Generate Service Account Key**:
-   - In Firebase Console, go to **Project Settings** → **Service Accounts**
-   - Click **"Generate new private key"** at the bottom
-   - A JSON file will download containing your credentials
-
-3. **Add the Service Account Key to filterere**:
-   - Create a `certs` directory in the filterere project root if it doesn't exist:
-     ```bash
-     mkdir -p certs
-     ```
-   - Copy the downloaded JSON file to `certs/serviceAccountKey.json`
-   - **IMPORTANT**: Ensure `.gitignore` includes `certs/serviceAccountKey.json` to keep credentials secure
-
-4. **Enable Firestore in Firebase**:
-   - In Firebase Console, go to **Firestore Database**
-   - Click **"Create Database"**
-   - Choose **"Start in production mode"** and select a location (e.g., `eur3`)
-   - Click **"Enable"**
-
-5. **Update shared/config.yml**:
-   - Set `useFirestoreForTimestamp: true` in `shared/config.yml`
-   - Verify that `firestoreServiceAccountPath` points to `certs/serviceAccountKey.json`
-
-#### Security Notes:
-
-- The `certs/serviceAccountKey.json` file contains sensitive credentials. Keep it secure.
-- The updated Firestore security rules restrict access to admin SDK only (server-side).
-- **Important:** If Firebase credentials are invalid or missing, the app automatically falls back to local file storage - no Firebase setup is required for basic functionality.
+ 
+ **Firebase is completely optional.** Filterere works perfectly as a standard Node.js application with local file storage. You only need Firebase if you want to:
+ 
+ - **Deploy to Cloud Functions** - Run email processing as serverless functions on Firebase infrastructure
+ - **Use Firestore storage** - Store timestamps and settings in the cloud instead of local files
+ 
+ **Skip this entire step if you just want to run locally** - the app will work with local file storage by default.
+ 
+ #### If You Want Firebase Cloud Deployment:
+ 
+ 1. **Install Firebase CLI & Google Cloud SDK**:
+    - Install Firebase tools: `npm install -g firebase-tools`
+    - Install Google Cloud SDK: Follow instructions at [cloud.google.com/sdk](https://cloud.google.com/sdk/docs/install)
+ 
+ 2. **Authenticate**:
+    - Log in to Firebase:
+      ```bash
+      firebase login
+      ```
+    - Set up Application Default Credentials (allows running locally without manually downloading keys):
+      ```bash
+      gcloud auth application-default login
+      ```
+ 
+ 3. **Enable Firestore in Firebase**:
+    - Go to [Firebase Console](https://console.firebase.google.com/) -> **Firestore Database**
+    - Click **"Create Database"**
+    - Choose **"Start in production mode"** and select a location (e.g., `eur3`)
+    - Click **"Enable"**
+ 
+ 4. **Update shared/config.yml**:
+    - Set `useFirestoreForTimestamp: true` in `shared/config.yml`
+ 
+ #### Legacy Method (Manual Service Account Key)
+ If you prefer not to use the gcloud CLI, you can still use a service account key file:
+ 1. Generate a new private key in Firebase Console -> Project Settings -> Service Accounts.
+ 2. Save the JSON file to `certs/serviceAccountKey.json` in the project root.
+ 3. The app will automatically detect and use this file if present.
 
 ### Step 3: Configure the YAML File
 
