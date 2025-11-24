@@ -76,6 +76,8 @@ Note: this has only been tested for Mac.
 
 ## Setup Instructions
 
+**Quick Start:** Filterere works out of the box as a local Node.js application. You can skip Firebase setup entirely and start with Steps 1, 3, 4, and 5.
+
 Follow these steps to get filterere up and running on your system:
 
 ### Step 1: Gmail IMAP Access with App Password
@@ -109,11 +111,16 @@ To securely access your Gmail account using IMAP in applications like filterere,
     - A 16-character code will be displayed on your screen. This is your app password, and you'll use it instead of your regular password for setting up IMAP access in filterere.
     - Follow any on-screen instructions to enter the app password into filterere's configuration. Typically, you'll replace your regular password with this app password in the `.env` file where IMAP credentials are specified.
 
-### Step 2: Setup Firebase (Optional)
+### Step 2: Optional - Firebase Cloud Deployment
 
-Firebase integration is **optional** and is used only for storing email processing timestamps in Firestore instead of a local file. If you don't want to use Firebase, you can skip this step and use the default local file storage.
+**Firebase is completely optional.** Filterere works perfectly as a standard Node.js application with local file storage. You only need Firebase if you want to:
 
-#### To Enable Firebase Timestamp Storage:
+- **Deploy to Cloud Functions** - Run email processing as serverless functions on Firebase infrastructure
+- **Use Firestore storage** - Store timestamps and settings in the cloud instead of local files
+
+**Skip this entire step if you just want to run locally** - the app will work with local file storage by default.
+
+#### If You Want Firebase Cloud Deployment:
 
 1. **Create a Firebase Project** (if you don't have one):
    - Go to [Firebase Console](https://console.firebase.google.com/)
@@ -147,7 +154,7 @@ Firebase integration is **optional** and is used only for storing email processi
 
 - The `certs/serviceAccountKey.json` file contains sensitive credentials. Keep it secure.
 - The updated Firestore security rules restrict access to admin SDK only (server-side).
-- If Firebase credentials are invalid or missing, the app will automatically fall back to local file storage.
+- **Important:** If Firebase credentials are invalid or missing, the app automatically falls back to local file storage - no Firebase setup is required for basic functionality.
 
 ### Step 3: Configure the YAML File
 

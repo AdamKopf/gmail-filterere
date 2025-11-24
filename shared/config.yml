@@ -43,6 +43,12 @@ settings:
   # if true, star all kept emails
   starAllKeptEmails: true
 
+  # if true, generate and use self-signed certificates for IMAP (for local development)
+  useSelfSignedCerts: true
+
+  # if true, running in Firebase Functions environment
+  isFirebaseFunctions: false
+
   # choose either 'server' or 'script'.  'script' is the recommended.
   runAsServerOrScript: script
   # port number
