@@ -17,7 +17,7 @@ settings:
   # if true, save the timestamp to Cloud Firestore instead of a local file
   # NOTE: Requires valid Firebase service account credentials at firestoreServiceAccountPath
   # If set to true but credentials are invalid, will automatically fallback to local file storage
-  useFirestoreForTimestamp: false
+  useFirestoreForTimestamp: true
   # Path to your Firebase service account JSON file. 
   # Download this from Firebase Console -> Project Settings -> Service accounts -> Generate new private key
   # IMPORTANT: Keep this file secure and add it to .gitignore (it contains sensitive credentials)
@@ -47,7 +47,7 @@ settings:
   useSelfSignedCerts: true
 
   # if true, running in Firebase Functions environment
-  isFirebaseFunctions: false
+  isFirebaseFunctions: true
 
   # choose either 'server' or 'script'.  'script' is the recommended.
   runAsServerOrScript: script

@@ -7,5 +7,6 @@
 .env
 .idea*
 lastTimestamp.txt
+*.log
 certs/
 node_modules/
