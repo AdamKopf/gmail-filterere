@@ -9,7 +9,7 @@ async function analyzeEmail(emailSubject, emailSender, emailBody, emailDate, con
     let emailPrompt = `ONLY OUTPUT JSON ALL OUTPUT IS IN JSON.
         JSON FIELD INSTRUCTIONS:
         meets_criteria = [true or false]
-        explanation = Explain why the email does or does not meet the criteria defined below in the rules
+        explanation = Explain in one very short sentence why the email does or does not meet the criteria defined below in the rules
         category = CHOOSE ONLY ONE OF ["${categoriesList}"]
         
         <email>
@@ -27,8 +27,6 @@ async function analyzeEmail(emailSubject, emailSender, emailBody, emailDate, con
         <email>
         <subject>${emailSubject}</subject> <sender>${emailSender}</sender>
         </email>
-
-        Let's think step by step and take a deep breath.  I will give you a $100,000 reward for ensuring you have correctly classified whether the email meets the criteria according to the rules.  My career depends on it.
         
         Categories CAN ONLY BE ["${categoriesList}"]
         OUTPUT JSON ONLY DO NOT USE MARKDOWN in the following structure:

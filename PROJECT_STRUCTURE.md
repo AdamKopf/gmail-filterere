@@ -6,23 +6,22 @@
 clearmail-main/
 ├── src/                      # Main application code
 │   ├── server.js            # Express server (server mode)
-│   ├── processEmails.js     # IMAP email processing logic
-│   ├── analyzeEmail.js      # OpenAI email analysis
-│   ├── utilities.js         # Shared utilities (Firebase, OpenAI, timestamps)
 │   └── config/              # Configuration
 │       ├── config.js        # Config loader
 │       └── config.yml       # Config file (YAML)
 │
+├── shared/                   # Shared modules (duplicated from src/)
+│   ├── analyzeEmail.js      # Email analysis
+│   ├── processEmails.js     # Email processing
+│   ├── utilities.js         # Utilities
+│   └── config.yml           # Configuration
+│
 ├── functions/               # Google Cloud Functions (TypeScript)
 │   └── src/
-│       ├── index.ts         # Primary Cloud Function exports
-
+│       └── index.ts         # Primary Cloud Function exports
 │
-├── filterere/               # Alternative Cloud Functions deployment
-│   ├── index.js            # Secondary Cloud Function
-│   ├── processEmails.js    # Email processing
-│   ├── analyzeEmail.js     # Email analysis
-│   ├── utilities.js        # Utilities
+├── filterere/               # Google Cloud Functions deployment
+│   ├── index.js            # Cloud Function entry point
 │   └── config.js/yml       # Configuration
 │
 ├── firebase/                # Firebase configuration
@@ -76,7 +75,9 @@ Configuration settings in `src/config/config.yml`
 
 ## Key Modules
 
-- **processEmails**: Connects to IMAP server, fetches emails
-- **analyzeEmail**: Uses OpenAI to categorize/analyze emails
-- **utilities**: Firebase integration, OpenAI retries, timestamp tracking
-- **server**: Express API for on-demand processing
+All core logic is in the `shared/` directory:
+
+- **shared/processEmails.js**: Connects to IMAP server, fetches emails
+- **shared/analyzeEmail.js**: Uses OpenAI to categorize/analyze emails
+- **shared/utilities.js**: Firebase integration, OpenAI retries, timestamp tracking
+- **src/server.js**: Express API for on-demand processing (imports from shared/)

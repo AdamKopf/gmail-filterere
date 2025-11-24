@@ -12,7 +12,7 @@ This project began as a fork of clearmail and adds additional features and impro
 
 ### 1. At a Given Interval...
 
-Filterere operates on a configurable interval, determined by the `refreshInterval` setting in the `config.yml` file. This interval sets how often filterere checks for new emails. When running in script mode, the process runs continuously and checks for new emails at the specified interval (e.g., every 120 seconds by default).
+Filterere operates on a configurable interval, determined by the `refreshInterval` setting in the `shared/config.yml` file. This interval sets how often filterere checks for new emails. When running in script mode, the process runs continuously and checks for new emails at the specified interval (e.g., every 120 seconds by default).
 
 ### 2. Connecting to Gmail via IMAP
 
@@ -146,8 +146,8 @@ To securely access your Gmail account using IMAP in applications like filterere,
    - Choose **"Start in production mode"** and select a location (e.g., `eur3`)
    - Click **"Enable"**
 
-5. **Update config.yml**:
-   - Set `useFirestoreForTimestamp: true` in `config.yml`
+5. **Update shared/config.yml**:
+   - Set `useFirestoreForTimestamp: true` in `shared/config.yml`
    - Verify that `firestoreServiceAccountPath` points to `certs/serviceAccountKey.json`
 
 #### Security Notes:
@@ -158,7 +158,7 @@ To securely access your Gmail account using IMAP in applications like filterere,
 
 ### Step 3: Configure the YAML File
 
-Navigate to the `config.yml` file in the filterere directory. Customize these settings to match your email management preferences.
+Navigate to the `shared/config.yml` file. Customize these settings to match your email management preferences.
 
 #### YAML File Options
 
@@ -174,7 +174,7 @@ The `config.yml` file contains several options to customize how filterere works:
 - `categoryFolderNames`: A list of folder names for categorizing emails.
 - `rules`: Simple rules defining which emails to keep or reject.
 
-Additional details are included as comments in `config.yml`.
+Additional details are included as comments in `shared/config.yml`.
 
 ### Step 4: Configure .env File
 
@@ -291,7 +291,7 @@ Filterere supports integration with any running local LLM and is configured out 
 
 ### Configuration in filterere
 
-Once your LM Studio server is running and the model is downloaded, configure filterere to use the local LLM by editing the `config.yml` file:
+Once your LM Studio server is running and the model is downloaded, configure filterere to use the local LLM by editing the `shared/config.yml` file:
 
 ```yaml
 settings:
@@ -306,8 +306,6 @@ Make sure the `useLocalLLM` setting is set to `true` and the `postURL` points to
 ### Using OpenAI
 
 While using local LLMs can offer many advantages, it's important to note that performance and reliability may vary compared to using OpenAI's APIs. We have included some `fixJSON` work in the filterere codebase to address potential inconsistencies with model outputs, but local models can still be somewhat unreliable. If you encounter issues, consider using OpenAI but keep in mind you are sending your emails to their AI and you need to be comfortable with that level of not-privacy.
-
-For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, which offers a good balance between speed, accuracy, and cost. The `gpt-3.5-turbo` model also provides reasonably good performance but may not match the latest advancements found in newer models.
 
 #### Obtaining Your OpenAI API Key
 
@@ -347,7 +345,7 @@ For best performance, we recommend using OpenAI's `gpt-4.5-turbo-0125` model, wh
 2. Start filterere with PM2:
 
     ```bash
-    pm2 start server.js --name filterere
+    pm2 start src/server.js --name filterere
     ```
 
 3. To ensure filterere starts on system reboot, use the `pm2 startup` command and follow the instructions provided.

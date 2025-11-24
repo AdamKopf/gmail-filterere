@@ -6,8 +6,8 @@ require('dotenv').config();
 const app = express();
 const port = config.settings.portNumber;
 
-const { getLastTimestamp, saveLastTimestamp } = require('./utilities');
-const { processEmails } = require('./processEmails');
+const { getLastTimestamp, saveLastTimestamp } = require('../shared/utilities');
+const { processEmails } = require('../shared/processEmails');
 
 
 async function main() {
@@ -20,7 +20,7 @@ async function main() {
 
             app.get('/process-emails', async (req, res) => {
                 try {
-                    const timestamp = (req.query.timestamp) ? req.query.timestamp : await getLastTimestamp(config.settings.timestampFilePath);
+                    const timestamp = (req.query.timestamp) ? req.query.timestamp : await getLastTimestamp(config.settings.timestampFilePath, config);
                     const results = await processEmails(timestamp);
 
                     res.status(results.statusCode).send(results.message);
@@ -42,9 +42,9 @@ async function main() {
         const refreshIntervalMilliseconds = config.settings.refreshInterval * 1000; // Convert seconds to milliseconds
 
         const runProcessEmailsPeriodically = async () => {
-            try {
-                const timestamp = await getLastTimestamp(config.settings.timestampFilePath);
-                await processEmails(timestamp);
+             try {
+                 const timestamp = await getLastTimestamp(config.settings.timestampFilePath, config);
+                 await processEmails(timestamp);
                 // Optionally, handle success, e.g., log a message or update the timestamp
             } catch (error) {
                 console.error('Failed to process emails:', error);

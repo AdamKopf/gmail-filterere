@@ -6,8 +6,9 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
-const { processEmails } = require("./processEmails");
-const { getLastTimestamp } = require("./utilities");
+const { processEmails } = require("../shared/processEmails");
+const { getLastTimestamp } = require("../shared/utilities");
+const config = require("./config");
 
 // Define secrets for IMAP and OpenAI credentials
 const imapUser = defineSecret("IMAP_USER");
@@ -36,7 +37,7 @@ exports.processEmailsScheduled = onSchedule({
     process.env.OPENAI_API_KEY = openAIKey.value();
 
     // Get the last timestamp from Firestore
-    const timestamp = await getLastTimestamp("lastTimestamp.txt");
+    const timestamp = await getLastTimestamp("lastTimestamp.txt", config);
     logger.info(`Processing emails since: ${timestamp}`);
 
     // Process emails
