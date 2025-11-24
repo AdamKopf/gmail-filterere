@@ -34,14 +34,14 @@ settings:
   # if true, emails will be sorted into the folders/labels defined in the categoryFolderNames below
   # if false, all rejected emails will be moved into rejectedFolderName
   # NOTE: you must manually create whichever folders are referenced here in gmail as "labels" that match exactly
-  sortIntoCategoryFolders: true
+  sortIntoCategoryFolders: false
   rejectedFolderName: _Filtered
 
   # if true, mark all rejected emails as unread
   markAllRejectedEmailsRead: true
 
   # if true, star all kept emails
-  starAllKeptEmails: true
+  starAllKeptEmails: false
 
   # if true, generate and use self-signed certificates for IMAP (for local development)
   useSelfSignedCerts: true
