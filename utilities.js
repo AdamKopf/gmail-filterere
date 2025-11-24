@@ -1,5 +1,34 @@
 const {OpenAI} = require("openai");
 const fs = require('fs').promises;
+const fsSync = require('fs');
+const admin = require('firebase-admin');
+const path = require('path');
+const config = require('./config');
+
+let db = null;
+
+function getFirestoreDB() {
+    if (db) return db;
+
+    const serviceAccountPath = path.isAbsolute(config.settings.firestoreServiceAccountPath)
+        ? config.settings.firestoreServiceAccountPath
+        : path.join(__dirname, config.settings.firestoreServiceAccountPath);
+
+    if (!fsSync.existsSync(serviceAccountPath)) {
+        throw new Error(`Service account file not found at ${serviceAccountPath}`);
+    }
+
+    const serviceAccount = require(serviceAccountPath);
+
+    if (admin.apps.length === 0) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+    }
+
+    db = admin.firestore();
+    return db;
+}
 
 async function executeOpenAIWithRetry(params, retries = 3, backoff = 2500, rateLimitRetry = 10, timeoutOverride = 27500) {
     const RATE_LIMIT_RETRY_DURATION = 61000; // 61 seconds
@@ -64,6 +93,23 @@ function fixJSON(input) {
 }
 
 async function getLastTimestamp(timestampFilePath) {
+    if (config.settings.useFirestoreForTimestamp) {
+        try {
+            const db = getFirestoreDB();
+            const docRef = db.collection(config.settings.firestoreCollection).doc(config.settings.firestoreDocument);
+            const doc = await docRef.get();
+
+            if (doc.exists && doc.data()[config.settings.firestoreField]) {
+                return doc.data()[config.settings.firestoreField];
+            } else {
+                return new Date().toISOString();
+            }
+        } catch (error) {
+            console.error('Error reading timestamp from Firestore:', error);
+            return new Date().toISOString();
+        }
+    }
+
     try {
         const lastTimestamp = await fs.readFile(timestampFilePath, 'utf8');
         return lastTimestamp;
@@ -74,6 +120,19 @@ async function getLastTimestamp(timestampFilePath) {
 }
 
 async function saveLastTimestamp(timestamp, timestampFilePath) {
+    if (config.settings.useFirestoreForTimestamp) {
+        try {
+            const db = getFirestoreDB();
+            const docRef = db.collection(config.settings.firestoreCollection).doc(config.settings.firestoreDocument);
+            await docRef.set({
+                [config.settings.firestoreField]: timestamp
+            }, { merge: true });
+        } catch (error) {
+            console.error('Error saving timestamp to Firestore:', error);
+        }
+        return;
+    }
+
     await fs.writeFile(timestampFilePath, timestamp, 'utf8');
 }
 
