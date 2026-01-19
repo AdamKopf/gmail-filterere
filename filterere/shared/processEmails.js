@@ -116,12 +116,38 @@ async function processEmails(timestamp, config) {
                                                     if (emailAnalysis.judgment === true) {
                                                         // Flag the message as important
                                                         if (config.settings.starAllKeptEmails) imap.addFlags(attributes.uid, ['\\Flagged'], function (err) {
-                                                            if (err) console.log('Error starring email:', err);
+                                                            if (err) {
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION_ERROR',
+                                                                    action: 'STAR',
+                                                                    subject: email.subject,
+                                                                    error: err.message
+                                                                }));
+                                                            } else {
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION',
+                                                                    action: 'STAR',
+                                                                    subject: email.subject
+                                                                }));
+                                                            }
                                                         });
                                                     } else if (emailAnalysis.judgment === false) {
                                                         // Mark the message as seen and remove the primary inbox label
                                                         if (config.settings.markAllRejectedEmailsRead) imap.setFlags(attributes.uid, ['\\Seen'], function (err) {
-                                                            if (err) console.log('Error marking email as seen:', err);
+                                                            if (err) {
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION_ERROR',
+                                                                    action: 'MARK_READ',
+                                                                    subject: email.subject,
+                                                                    error: err.message
+                                                                }));
+                                                            } else {
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION',
+                                                                    action: 'MARK_READ',
+                                                                    subject: email.subject
+                                                                }));
+                                                            }
                                                         });
 
                                                         const folderToMoveTo = (config.settings.sortIntoCategoryFolders) ? emailAnalysis.category : config.settings.rejectedFolderName;
@@ -129,9 +155,20 @@ async function processEmails(timestamp, config) {
                                                         // Copy the message to "AI Rejects" label for archiving
                                                         imap.move(attributes.uid, folderToMoveTo, function (err) {
                                                             if (err) {
-                                                                console.log(`Error moving email to ${folderToMoveTo}:`, err);
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION_ERROR',
+                                                                    action: 'MOVE',
+                                                                    folder: folderToMoveTo,
+                                                                    subject: email.subject,
+                                                                    error: err.message
+                                                                }));
                                                             } else {
-                                                                console.log(`Email moved to ${folderToMoveTo}.`);
+                                                                console.log(JSON.stringify({
+                                                                    type: 'EMAIL_ACTION',
+                                                                    action: 'MOVE',
+                                                                    folder: folderToMoveTo,
+                                                                    subject: email.subject
+                                                                }));
                                                             }
                                                         });
 

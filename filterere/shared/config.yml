@@ -73,7 +73,5 @@ rules:
   keep: |
     * everything that is not in the reject section
   reject: |
-    * the email is a security alert about a new login 
+    * security alerts about a new login
     * notification about updated terms, rules, privacy policy
-    * marketing and updates about products or services
-    * receipts, order confirmations but leave tickets, serial numbers and other stuff that I'll need to use the thing I purchased

@@ -86,17 +86,17 @@ async function analyzeEmail(emailSubject, emailSender, emailBody, emailDate, con
             analysis.category = parsedResult.category;
             analysis.explanation = parsedResult.explanation;
 
-            console.log('*************************************************************************************************************************');
-            console.log('*************************************************************************************************************************');
-            console.log('Sender: ', emailSender);
-            console.log('Date: ', emailDate);
-            console.log('Subject: ', emailSubject);
-            console.log('Body: ', emailBody.substring(0, 100).replace(/\s+/g, ' '));
-            console.log('Category: ', analysis.category);
-            console.log('Meets Criteria / worth reading: ', analysis.judgment);
-            console.log('Explanation: ', analysis.explanation);
-            console.log('*************************************************************************************************************************');
-            console.log('*************************************************************************************************************************');
+            const emailDecisionLog = {
+                type: 'EMAIL_DECISION',
+                sender: emailSender,
+                date: emailDate,
+                subject: emailSubject,
+                bodyPreview: emailBody.substring(0, 100).replace(/\s+/g, ' '),
+                category: analysis.category,
+                decision: analysis.judgment ? 'KEEP' : 'REJECT',
+                explanation: analysis.explanation
+            };
+            console.log(JSON.stringify(emailDecisionLog));
         } catch (error) {
             console.log('Error parsing JSON: ', error);
             analysis.judgment = 'unknown';
